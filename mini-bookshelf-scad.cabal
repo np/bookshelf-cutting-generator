@@ -1,0 +1,13 @@
+cabal-version:       >=1.10
+name:                mini-bookshelf-scad
+version:             0.1.0.0
+build-type:          Simple
+
+executable shelf-generator
+  main-is:             Main.hs
+  hs-source-dirs:      app
+  build-depends:       base >=4.7 && <5,
+                       diagrams-lib,
+                       diagrams-svg,
+                       optparse-applicative
+  default-language:    Haskell2010
