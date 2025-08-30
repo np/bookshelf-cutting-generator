@@ -1,0 +1,36 @@
+name: Build shelf SVG
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Haskell
+        uses: actions/setup-haskell@v1
+        with:
+          ghc-version: '9.2'
+          cabal-version: '3.8'
+      - name: Build and run generator
+        run: |
+          cabal update
+          cabal build
+          cabal run shelf-generator -- \
+            --thickness 3 \
+            --rows 5 \
+            --cols 4 \
+            --cell-width 100 \
+            --cell-height 100 \
+            --area-width 730 \
+            --area-height 410 \
+            --output shelf.svg
+      - name: Check SVG
+        run: test -f shelf.svg
+      - name: Upload SVG artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: shelf-svg
+          path: shelf.svg
