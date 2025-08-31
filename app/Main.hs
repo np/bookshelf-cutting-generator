@@ -4,14 +4,13 @@
 
 module Main where
 
-import Diagrams.Prelude
-import Diagrams.Backend.SVG.CmdLine
+import Diagrams.Prelude hiding (value)
+import Diagrams.Backend.SVG (B, renderSVG)
 import Options.Applicative
 import Data.Maybe (fromMaybe)
 import qualified Data.List as L
 
--- | Command line options for the shelf generator
-data Options = Options
+data CLIOptions = CLIOptions
   { optThickness :: Double
   , optRows      :: Maybe Int
   , optCols      :: Maybe Int
@@ -23,8 +22,8 @@ data Options = Options
   , optOutput    :: FilePath
   }
 
-optionsParser :: Parser Options
-optionsParser = Options
+optionsParser :: Parser CLIOptions
+optionsParser = CLIOptions
   <$> option auto (long "thickness" <> short 't' <> value 3 <> help "Thickness of wood panels")
   <*> optional (option auto (long "rows" <> short 'r' <> help "Number of rows"))
   <*> optional (option auto (long "cols" <> short 'c' <> help "Number of columns"))
@@ -35,7 +34,7 @@ optionsParser = Options
   <*> optional (option auto (long "area-height" <> help "Cutting area height"))
   <*> strOption (long "output" <> short 'o' <> value "shelf.svg" <> help "Output SVG filename")
 
-optsInfo :: ParserInfo Options
+optsInfo :: ParserInfo CLIOptions
 optsInfo = info (optionsParser <**> helper)
   (fullDesc <> progDesc "Generate shelf cutting plans" <> header "mini-bookshelf-scad")
 
@@ -52,7 +51,7 @@ data Params = Params
   , pOutput    :: FilePath
   }
 
-fillDefaults :: Options -> Params
+fillDefaults :: CLIOptions -> Params
 fillDefaults o = Params
   { pThickness = optThickness o
   , pRows      = fromMaybe 2 (optRows o)
