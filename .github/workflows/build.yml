@@ -1,5 +1,5 @@
 ---
-name: Build shelf SVG
+name: CI build
 
 'on':
   push:
@@ -8,7 +8,7 @@ name: Build shelf SVG
     branches: [main]
 
 jobs:
-  generate:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -39,20 +39,30 @@ jobs:
           cabal update
           cabal build
 
+      - name: Find executable
+        id: list-bin
+        run: echo "path=$(cabal list-bin shelf-generator)" >> "$GITHUB_OUTPUT"
+
       - name: Run generator
-        run: >-
-          cabal run shelf-generator --
-          --thickness 3
-          --rows 5
-          --cols 4
-          --cell-width 100
-          --cell-height 100
-          --area-width 730
-          --area-height 410
-          --output shelf.svg
+        run: |
+          "${{ steps.list-bin.outputs.path }}" \
+            --thickness 3 \
+            --rows 5 \
+            --cols 4 \
+            --cell-width 100 \
+            --cell-height 100 \
+            --area-width 730 \
+            --area-height 410 \
+            --output shelf.svg
 
       - name: Check SVG
         run: test -f shelf.svg
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: shelf-generator
+          path: ${{ steps.list-bin.outputs.path }}
 
       - name: Upload SVG artifact
         uses: actions/upload-artifact@v4
