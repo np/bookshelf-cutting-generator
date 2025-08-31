@@ -4,7 +4,7 @@
 
 module Main where
 
-import Diagrams.Prelude
+import Diagrams.Prelude hiding (value)
 import Diagrams.Backend.SVG.CmdLine
 import Options.Applicative
 import Data.Maybe (fromMaybe)
