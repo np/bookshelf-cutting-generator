@@ -1,0 +1,71 @@
+---
+name: CI build
+
+'on':
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Haskell
+        uses: haskell-actions/setup@v2
+        with:
+          ghc-version: '9.6'
+          cabal-version: 'latest'
+
+      - name: Cache cabal packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cabal/packages
+            ~/.cabal/store
+            dist-newstyle
+          key: >-
+            ${{ runner.os }}-cabal-${{ hashFiles(
+              '**/*.cabal',
+              'cabal.project*'
+            ) }}
+          restore-keys: |
+            ${{ runner.os }}-cabal-
+
+      - name: Build generator
+        run: |
+          cabal update
+          cabal build
+
+      - name: Find executable
+        id: list-bin
+        run: echo "path=$(cabal list-bin shelf-generator)" >> "$GITHUB_OUTPUT"
+
+      - name: Run generator
+        run: |
+          "${{ steps.list-bin.outputs.path }}" \
+            --thickness 3 \
+            --rows 5 \
+            --cols 4 \
+            --cell-width 100 \
+            --cell-height 100 \
+            --area-width 730 \
+            --area-height 410 \
+            --output shelf.svg
+
+      - name: Check SVG
+        run: test -f shelf.svg
+
+      - name: Upload executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: shelf-generator
+          path: ${{ steps.list-bin.outputs.path }}
+
+      - name: Upload SVG artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shelf-svg
+          path: shelf.svg
