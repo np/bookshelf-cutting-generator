@@ -5,7 +5,7 @@
 module Main where
 
 import Diagrams.Prelude hiding (value)
-import Diagrams.Backend.SVG.CmdLine
+import Diagrams.Backend.SVG (B, renderSVG)
 import Options.Applicative
 import Data.Maybe (fromMaybe)
 import qualified Data.List as L
